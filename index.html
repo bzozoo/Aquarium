@@ -1,0 +1,415 @@
+
+<!DOCTYPE html>
+<html lang="en" >
+
+<head>
+
+  <meta charset="UTF-8">
+  
+
+  <title>CodePen - Aquarium v3</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  
+  
+  
+<style>
+body {
+	margin: 0;
+}
+#container {
+	background-image: url("https://i.imgur.com/rebi7Sw.jpg");
+	background-color: lightblue;
+	background-size: cover;
+	width: 100%;
+	height: 100%;
+	overflow: hidden;
+	position: absolute;
+}
+.waterLayer{
+	width: 100%;
+	height: 100%;
+	overflow: hidden;
+	position: absolute;
+}
+
+#waterLayer0 {
+	width: 30%;
+	height: 80%;
+}
+
+.fish {
+	position: absolute;
+	-webkit-transition: all 0.5s linear;
+	-moz-transition: all 0.5s linear;
+	-o-transition: all 0.5s linear;
+	transition: all 0.5s linear;
+}
+
+.verticalflip {
+	-moz-transform: scale(1, -1);
+	-webkit-transform: scale(1, -1);
+	-o-transform: scale(1, -1);
+	-ms-transform: scale(1, -1);
+	transform: scale(1, -1);
+}
+
+.horizontalflip {
+	-moz-transform: scale(-1, 1);
+	-webkit-transform: scale(-1, 1);
+	-o-transform: scale(-1, 1);
+	-ms-transform: scale(-1, 1);
+	transform: scale(-1, 1);
+}
+
+.doublehorizontalflip {
+	-moz-transform: scale(-1, 1);
+	-webkit-transform: scale(-1, 1);
+	-o-transform: scale(-1, 1);
+	-ms-transform: scale(-1, 1);
+	transform: scale(-1, 1);
+}
+</style>
+
+  
+  
+  
+  
+
+</head>
+
+<body translate="no" >
+  <div id="container">
+	<div class="waterLayer" id="waterLayer0">
+		
+	</div>
+	<div class="waterLayer" id="waterLayer1">
+		
+	</div>
+	<div class="waterLayer" id="waterLayer2">
+		
+	</div>
+	<div class="waterLayer" id="waterLayer3">
+		
+	</div>
+	
+</div>
+  
+  
+      <script id="rendered-js" >
+//Variables
+
+let directions = [
+	"right",
+	"left",
+	"up",
+	"down",
+	"downright",
+	"downleft",
+	"upright",
+	"upleft"
+];
+let fishes = [
+	{
+		name: "catfish",
+		imageURL: "https://i.imgur.com/AwH3QhO.gif",
+		flip: false,
+		waterLayer: document.querySelector("#waterLayer1"),
+		width: 29,
+		height: 15,
+		top: 60,
+		left: 60,
+		directionActual: directions[Math.floor(Math.random() * directions.length)],
+		speed: 12,
+		swimming: true
+	},
+	{
+		name: "JoeY",
+		imageURL: "https://i.imgur.com/MigFRk5.gif",
+		flip: true,
+		waterLayer: document.querySelector("#waterLayer2"),
+		width: 29,
+		height: 15,
+		top: 90,
+		left: 90,
+		directionActual: directions[Math.floor(Math.random() * directions.length)],
+		speed: 18,
+		swimming: true
+	},
+	{
+		name: "JasonX",
+		imageURL: "https://i.imgur.com/xOA8RFJ.gif",
+		flip: true,
+		waterLayer: document.querySelector("#waterLayer2"),
+		width: 29,
+		height: 15,
+		top: 90,
+		left: 90,
+		directionActual: directions[Math.floor(Math.random() * directions.length)],
+		speed: 11,
+		swimming: true
+	},
+	{
+		name: "Shark",
+		imageURL: "https://i.imgur.com/9pN7sET.gif",
+		flip: true,
+		waterLayer: document.querySelector("#waterLayer2"),
+		width: 29,
+		height: 15,
+		top: 90,
+		left: 90,
+		directionActual: directions[Math.floor(Math.random() * directions.length)],
+		speed: 18,
+		swimming: true
+	},
+	{
+		name: "Star",
+		imageURL: "https://i.gifer.com/ZfUY.gif",
+		flip: false,
+		waterLayer: document.querySelector("#waterLayer3"),
+		width: 29,
+		height: 15,
+		top: container.offsetHeight - 100,
+		left: container.offsetWidth - 100,
+		directionActual: directions[Math.floor(Math.random() * directions.length)],
+		speed: 20,
+		swimming: "never"
+	},
+	{
+		name: "Medusa",
+		imageURL: "https://i.imgur.com/JkdWpry.gif",
+		flip: false,
+		waterLayer: document.querySelector("#waterLayer0"),
+		width: 30,
+		height: 60,
+		top: 2,
+		left: 2,
+		directionActual: directions[Math.floor(Math.random() * directions.length)],
+		speed: 10,
+		swimming: true
+	}
+];
+
+//Inits
+createFishes();
+setInterval(swimmingFishes, 250);
+setInterval(randomFishResting, 10000);
+setInterval(randomFishDirectionChanging, 10000);
+
+//Templates
+function fishPanel(fish) {
+	let fishTemplate = function () {
+		return `<div class="fish${this.flip}" id="${this.name}" style="top:${this.top}px;left:${this.left}px; position: absolute; background-image: url('${this.imageURL}'); backgound-color: lightblue; background-size: 100% 100%; width: ${this.width}%; max-width: 400px; height: ${this.height}%"></div>`;
+	};
+
+	let fishInstance = fishTemplate.bind({
+		name: fish.name,
+		imageURL: fish.imageURL,
+		flip: fish.flip ? " horizontalflip" : "",
+		width: fish.width,
+		height: fish.height,
+		top: fish.top,
+		left: fish.left
+	})();
+	return fishInstance;
+}
+
+//Renders
+////Renders/InitRenderOfFishes
+function createFishes() {
+	fishes.map((fish) => (fish.waterLayer.innerHTML += fishPanel(fish)));
+	fishes.map((fish) => (fish.fishDiv = document.querySelector(`#${fish.name}`)));
+}
+
+////Renders/FishSwimmReRender
+function swimmingFishes() {
+	for (let fish of fishes) {
+		
+		let slideCollisionHandlered = slideCollisionHandler(fish)
+
+		let directionHorizontal =
+			fish.directionActual === "right" ||
+			fish.directionActual === "downright" ||
+			fish.directionActual === "upright"
+				? 1
+				: fish.directionActual === "left" ||
+				  fish.directionActual === "downleft" ||
+				  fish.directionActual === "upleft"
+				? -1
+				: 0;
+		let directionVertical =
+			fish.directionActual === "down" ||
+			fish.directionActual === "downright" ||
+			fish.directionActual === "downleft"
+				? 1
+				: fish.directionActual === "up" ||
+				  fish.directionActual === "upright" ||
+				  fish.directionActual === "upleft"
+				? -1
+				: 0;
+
+		if (!slideCollisionHandlered && (fish.swimming == true || fish.swimming == "always")) {
+			fish.fishDiv.style.left =
+				parseInt(fish.fishDiv.style.left) + directionHorizontal * fish.speed + "px";
+			fish.fishDiv.style.top =
+				parseInt(fish.fishDiv.style.top) + directionVertical * fish.speed + "px";
+		}
+	}
+}
+
+//Handlers, Checkers, Controlls
+//// Handlers/SlideCollisions
+function slideCollisionHandler(fish){
+	let slideCollisionHandlered = false;
+	let slideCollision = slideDetection(fish);
+	if(slideCollision.check){
+		slideCollosionCorrection(fish, slideCollision.type)
+		directionHandler(fish);
+		slideCollisionHandlered = true;
+	}
+	
+	return slideCollisionHandlered
+}
+
+function slideDetection(fish) {
+	let slideCollision = { check: false, type: false };
+
+	slideCollision =
+		parseInt(fish.fishDiv.style.top) < fish.waterLayer.offsetTop
+			? { check: true, type: "top" }
+			: slideCollision;
+	slideCollision =
+		parseInt(fish.fishDiv.style.top) >
+		fish.waterLayer.offsetHeight - fish.fishDiv.offsetHeight
+			? { check: true, type: "bottom" }
+			: slideCollision;
+	slideCollision =
+		parseInt(fish.fishDiv.style.left) < fish.waterLayer.offsetLeft
+			? { check: true, type: "left" }
+			: slideCollision;
+	slideCollision =
+		parseInt(fish.fishDiv.style.left) >
+		fish.waterLayer.offsetWidth - fish.fishDiv.offsetWidth
+			? { check: true, type: "right" }
+			: slideCollision;
+	
+		(slideCollision.check) && console.log(
+			fish.name + "%c " + slideCollision.type.toUpperCase() + " side collision detected!",
+			"font-size: 18px; background: black; color: red"
+		);
+	
+	return slideCollision;
+}
+
+function slideCollosionCorrection(fish, slideCollisionType){
+	(slideCollisionType === "top") && (fish.fishDiv.style.top = "17px");
+	(slideCollisionType === "bottom") && (fish.fishDiv.style.top = (fish.waterLayer.offsetHeight - fish.fishDiv.offsetHeight - 10) + "px");
+	(slideCollisionType === "right") && (fish.fishDiv.style.left = (fish.waterLayer.offsetWidth - fish.fishDiv.offsetWidth - 5) + "px");
+	(slideCollisionType === "left") && (fish.fishDiv.style.left = "2px");
+	
+}
+
+//// Handlers/Directions
+function directionHandler(fish){
+	let direction = newDirection(fish)
+	if(direction){
+		fish.directionActual = direction;
+		flipCorrection(fish);
+		console.log(
+			fish.name + "%c DIRECTION WAS CHANGED : " + fish.directionActual,
+			"background: darkgreen;color:white;"
+		);
+	}
+}
+
+function newDirection(fish) {
+	let oldDirection = fish.directionActual;
+	let newestDirection =
+		directions[Math.floor(Math.random() * directions.length)];
+	let change = oldDirection != newestDirection ? true : false;
+	console.log(
+		fish.name +
+			" OLD DIRECTION ::: " +
+			oldDirection +
+			" - NEW DIRECTION :::: " +
+			newestDirection +
+			" CHANGE ? ::: " +
+			change
+	);
+	if (change) {
+		return newestDirection;
+	}
+}
+
+function flipCorrection(fish){
+		if (
+			fish.directionActual === "left" ||
+			fish.directionActual === "downleft" ||
+			fish.directionActual === "upleft"
+		) {
+			if (fish.flip) {
+				fish.fishDiv.classList.remove("horizontalflip");
+			} else {
+				fish.fishDiv.classList.add("horizontalflip");
+			}
+		} else {
+			if (fish.flip) {
+				fish.fishDiv.classList.add("horizontalflip");
+			} else {
+				fish.fishDiv.classList.remove("horizontalflip");
+			}
+		}	
+}
+
+//// Handlers/RandomFish Events
+function randomFishResting(set = 25) {
+	for (let fish of fishes) {
+		let randomSTOnumber = Math.floor(Math.random() * 50000);
+
+		setTimeout(function () {
+			if (fish.swimming != "never" && fish.swimming != "always") {
+				let swimmStop = randomTrueFalse(set);
+				swimmStop && console.log(fish.name + "%c SWIMMING STOPPED", "color: red;");
+				!swimmStop &&
+					console.log(fish.name + "%c SWIMMING RESTARTED", "color: darkgreen;");
+				fish.swimming = swimmStop ? false : true;
+			}
+		}, randomSTOnumber);
+	}
+}
+
+
+function randomFishDirectionChanging(set = 25) {
+	for (let fish of fishes) {
+		let directionchanging = randomTrueFalse(set);
+
+		if (directionchanging) {
+			console.log(fish.name + "%c RANDOM DIRECTION CHANGING", "color: orange;");
+			newDirection(fish);
+		}
+	}
+}
+
+//Helpers
+
+function randomTrueFalse(percent) {
+	return Math.random() < percent / 100;
+}
+
+function consoleFishPostiotion(fish){
+		return {
+			"FISH NAME": fish.name,
+			"OFFSET LEFT": fish.fishDiv.offsetLeft,
+			"STYLE LEFT": fish.fishDiv.style.left,
+			"STYLE TOP": fish.fishDiv.style.top,
+			"DIRECTION ACTUAL": fish.directionActual,
+			"SWIMMING": fish.swimming
+		};
+}
+    </script>
+
+  
+
+</body>
+
+</html>
+ 
